@@ -1,6 +1,12 @@
-# RequestHelper
+# WebHelper
 
-The requests helper program.
+Web 爬虫小工具
+
+## 安装
+
+```bash
+pip install web-helper
+```
 
 ## 使用方法
 
@@ -32,10 +38,4 @@ logger.add(sys.stdout, level="TRACE")
 
 title = get_html(f'https://baidu.com', obey_robot=False).to_soup().find('title').text
 assert title == '百度一下，你就知道'
-```
-
-## 安装仓库
-
-```bash
-pip install requests-helper
 ```
