@@ -18,11 +18,11 @@ URL = 'https://github.com/imfht/RequestsHelper'
 EMAIL = 'fiht@qq.com'
 AUTHOR = 'jinxu'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.0'
+VERSION = '0.1.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'requests', 'feedparser', 'loguru',
+    'requests', 'feedparser', 'loguru', 'bs4'
 ]
 
 # What packages are optional?

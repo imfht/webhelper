@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import time
 import urllib.robotparser
 from urllib.parse import urlparse
@@ -8,6 +9,17 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger
+
+VIA_PROXY = os.getenv('VIA_PROXY', False)
+WS_TOKEN = os.getenv('WS_TOKEN', '')
+proxy_list = []
+if os.getenv('VIA_PROXY', False):
+    if not WS_TOKEN:
+        raise Exception('WS_TOKEN is required when VIA_PROXY is set')
+    response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
+                            headers={"Authorization": WS_TOKEN}, timeout=10)
+    proxy_list = [f'http://{proxy["username"]}:{proxy["password"]}@{proxy["proxy_address"]}:{proxy["ports"]["http"]}'
+                  for proxy in response.json()['result']]
 
 
 class RequestNotSucceedException(Exception):
@@ -29,6 +41,13 @@ class HtmlResponse():
     def to_json(self):
         return json.loads(self.text)
 
+    def to_html(self):
+        return self.text
+
+    def to_rss(self):
+        item = feedparser.parse(self.text)
+        return [i for i in item.entries]
+
 
 def can_fetch(url):
     rp = urllib.robotparser.RobotFileParser()
@@ -39,11 +58,9 @@ def can_fetch(url):
 
 
 def get_a_proxy():
-    response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
-                            headers={"Authorization": os.getenv('WSToken')}, timeout=10)
-    for i in response.json()['results']:
-        proxy_url = f'http://{i["username"]}:{i["password"]}@{i["proxy_address"]}:{i["ports"]["http"]}'
-        return {'http': proxy_url, 'https': proxy_url}
+    proxy_url = random.choice(proxy_list)
+    logger.trace("使用代理 %s" % proxy_url)
+    return {'http': proxy_url, 'https': proxy_url}
 
 
 def get_html(url, max_retries=3, timeout=10, obey_robot=True):
@@ -51,7 +68,7 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
     proxy = None
     if obey_robot:
         try:
-            if not can_fetch(url):
+            if not can_fetch(url) or os.getenv('VIA_PROXY') == 'True':
                 proxy = get_a_proxy()
                 logger.info("robots协议禁止抓取，使用匿名代理: %s" % proxy['http'])
                 # raise RobotNotAllowedException()
@@ -61,7 +78,7 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
     for i in range(max_retries):
         try:
             resp = requests.get(url, timeout=timeout, headers={"User-Agent": userAgent}, proxies=proxy)
-            logger.info("send request to %s" % url)
+            logger.trace("send request to %s" % url)
             if resp.status_code != 200:
                 logger.warning(f"{url} status code {resp.status_code}")
             return HtmlResponse(resp.text)
@@ -70,16 +87,6 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
         finally:
             time.sleep(1)
     logger.exception(RequestNotSucceedException())
-
-
-def get_rss(url, max_retires=3, timeout=10):
-    html = get_html(url, max_retires, timeout)
-    item = feedparser.parse(html.text)
-    return [i for i in item.entries]
-
-
-def remove_tag(html_node):
-    return BeautifulSoup(html_node).text
 
 
 if __name__ == '__main__':
