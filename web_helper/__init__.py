@@ -95,6 +95,5 @@ def set_global_random_proxy(ws_token):
 
 if __name__ == '__main__':
     # assert can_fetch('https://about.gitlab.com/solutions/open-source/') is True
-    # assert can_fetch('https://about.gitlab.com/handbook/ceo/shadow/setalarm.sh') is False
+    assert can_fetch('https://about.gitlab.com/handbook/ceo/shadow/setalarm.sh') is False
     # print(get_html('https://about.gitlab.com/handbook/ceo/shadow/setalarm.sh').text)
-    print(get_a_proxy())
