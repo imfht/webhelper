@@ -71,7 +71,8 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
     for i in range(max_retries):
         try:
             resp = requests.get(url, timeout=timeout, headers={"User-Agent": userAgent}, proxies=proxy)
-            logger.trace("send request to %s" % url)
+            trace_msg = f"请求成功: {url}, 使用代理 {proxy}" if proxy else f"请求成功: {url}"
+            logger.trace(trace_msg)
             if resp.status_code != 200:
                 logger.warning(f"{url} status code {resp.status_code}")
             return HtmlResponse(resp.text)

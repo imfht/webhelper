@@ -12,13 +12,13 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'RequestsHelper'
+NAME = 'web_helper'
 DESCRIPTION = '又一个爬虫新轮子～'
 URL = 'https://github.com/imfht/RequestsHelper'
 EMAIL = 'fiht@qq.com'
 AUTHOR = 'jinxu'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.2'
+VERSION = '0.1.4'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
