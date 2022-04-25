@@ -90,7 +90,7 @@ def set_global_random_proxy(ws_token):
                             headers={"Authorization": ws_token}, timeout=10)
     proxy_list = [
         f'http://{proxy["username"]}:{proxy["password"]}@{proxy["proxy_address"]}:{proxy["ports"]["http"]}'
-        for proxy in response.json()['result']]
+        for proxy in response.json()['results']]
 
 
 if __name__ == '__main__':
