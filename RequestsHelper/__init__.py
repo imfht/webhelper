@@ -10,16 +10,9 @@ import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 
-VIA_PROXY = os.getenv('VIA_PROXY', False)
+VIA_PROXY = os.getenv('VIA_PROXY', '')
 WS_TOKEN = os.getenv('WS_TOKEN', '')
 proxy_list = []
-if os.getenv('VIA_PROXY', False):
-    if not WS_TOKEN:
-        raise Exception('WS_TOKEN is required when VIA_PROXY is set')
-    response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
-                            headers={"Authorization": WS_TOKEN}, timeout=10)
-    proxy_list = [f'http://{proxy["username"]}:{proxy["password"]}@{proxy["proxy_address"]}:{proxy["ports"]["http"]}'
-                  for proxy in response.json()['result']]
 
 
 class RequestNotSucceedException(Exception):
@@ -87,6 +80,17 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
         finally:
             time.sleep(1)
     logger.exception(RequestNotSucceedException())
+
+
+def set_global_random_proxy(ws_token):
+    os.environ['VIA_PROXY'] = '1'
+    os.environ['WS_TOKEN'] = ws_token
+    global proxy_list
+    response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
+                            headers={"Authorization": WS_TOKEN}, timeout=10)
+    proxy_list = [
+        f'http://{proxy["username"]}:{proxy["password"]}@{proxy["proxy_address"]}:{proxy["ports"]["http"]}'
+        for proxy in response.json()['result']]
 
 
 if __name__ == '__main__':
