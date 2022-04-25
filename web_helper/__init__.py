@@ -59,7 +59,10 @@ def get_a_proxy():
 def get_html(url, max_retries=3, timeout=10, obey_robot=True):
     """输入一个url, 返回html"""
     proxy = None
-    if obey_robot:
+    if VIA_PROXY:
+        proxy = get_a_proxy()
+        logger.info("使用匿名代理: %s" % proxy['http'])
+    elif obey_robot:
         try:
             if not can_fetch(url) or os.getenv('VIA_PROXY'):
                 proxy = get_a_proxy()
@@ -84,7 +87,8 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
 
 
 def set_global_random_proxy(ws_token):
-    os.environ['VIA_PROXY'] = '1'
+    global VIA_PROXY
+    VIA_PROXY = '1'
     global proxy_list
     response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
                             headers={"Authorization": ws_token}, timeout=10)
