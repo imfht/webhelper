@@ -61,7 +61,7 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
     proxy = None
     if obey_robot:
         try:
-            if not can_fetch(url) or os.getenv('VIA_PROXY') == 'True':
+            if not can_fetch(url) or os.getenv('VIA_PROXY'):
                 proxy = get_a_proxy()
                 logger.info("robots协议禁止抓取，使用匿名代理: %s" % proxy['http'])
                 # raise RobotNotAllowedException()
@@ -85,10 +85,9 @@ def get_html(url, max_retries=3, timeout=10, obey_robot=True):
 
 def set_global_random_proxy(ws_token):
     os.environ['VIA_PROXY'] = '1'
-    os.environ['WS_TOKEN'] = ws_token
     global proxy_list
     response = requests.get("https://proxy.webshare.io/api/proxy/list/?page=1&countries=US-FR",
-                            headers={"Authorization": WS_TOKEN}, timeout=10)
+                            headers={"Authorization": ws_token}, timeout=10)
     proxy_list = [
         f'http://{proxy["username"]}:{proxy["password"]}@{proxy["proxy_address"]}:{proxy["ports"]["http"]}'
         for proxy in response.json()['result']]
